@@ -34,9 +34,9 @@ CL_ERROR = Fore.RED
 
 class Chat:
     def __init__(self):
-        self.my_chat_port = random.randrange(0, 64000)
-        self.broadcast_port = random.randrange(0, 64000)
-        self.other = ('0', 0)
+        self.my_chat_port = random.randrange(0, 65535)
+        self.broadcast_port = random.randrange(0, 65535)
+        self.other_addr = ('0', 0)
         self.is_connected = False
         self.name = input("Enter your name: ")
 
@@ -50,7 +50,7 @@ class Chat:
 
     def set_other(self, ip, port):
         port = int(port)
-        self.other = (ip, port)
+        self.other_addr = (ip, port)
         pass
 
     def udp_broadcast(self):
@@ -113,11 +113,11 @@ class Chat:
 
     def connect(self):
         self.is_connected = True
-        print(CL_REGULAR + "Connecting to {}\r".format(self.other), end="")
+        print(CL_REGULAR + "Connecting to {}\r".format(self.other_addr), end="")
         try:
             client = socket.socket(AF_INET, SOCK_STREAM)
-            client.connect(self.other)
-            print(CL_REGULAR + "{} connected".format(self.other))
+            client.connect(self.other_addr)
+            print(CL_REGULAR + "{} connected".format(self.other_addr))
             print(CL_REGULAR + "I am chat client")
             self.handle_chat(client)
         except ConnectionRefusedError:
