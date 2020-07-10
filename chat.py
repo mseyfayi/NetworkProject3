@@ -1,6 +1,7 @@
 import random
 import socket
 import time
+
 from colorama import Fore
 
 try:
@@ -45,6 +46,10 @@ class Chat:
 
         print(CL_REGULAR + "My chat port is ", self.my_chat_port)
         print(CL_REGULAR + "My broadcast port is ", self.broadcast_port)
+        pass
+
+    def start(self):
+        self.start_udp_threads()
         pass
 
     def set_other(self, ip, port):
@@ -197,4 +202,4 @@ class Chat:
 
 if __name__ == "__main__":
     chat = Chat()
-    chat.start_udp_threads()
+    chat.start()
