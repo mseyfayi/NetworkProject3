@@ -113,7 +113,7 @@ class Chat:
 
     def connect(self):
         self.is_connected = True
-        print(CL_REGULAR + "Connecting to {}\r".format(self.other_addr), end="")
+        print(CL_REGULAR + "Connecting to {}...".format(self.other_addr))
         try:
             client = socket.socket(AF_INET, SOCK_STREAM)
             client.connect(self.other_addr)
@@ -122,11 +122,12 @@ class Chat:
             self.handle_chat(client)
         except ConnectionRefusedError:
             self.is_connected = False
+            self.start_udp_threads()
         pass
 
     def listen(self):
         self.is_connected = True
-        print(CL_REGULAR + "Listening at {}\r".format(self.my_chat_port), end="")
+        print(CL_REGULAR + "Listening at {}...".format(self.my_chat_port))
         try:
             server = socket.socket(AF_INET, SOCK_STREAM)
             server.bind(('', self.my_chat_port))
