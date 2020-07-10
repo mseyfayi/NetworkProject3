@@ -1,21 +1,17 @@
 import random
 import socket
 import time
+from threading import Thread
 
 from colorama import Fore
 
-try:
-    from msvcrt import getch
-except ImportError:
-    from getch import getch
-from threading import Thread
+from myProtocol.chat import receive as c_receive
+from myProtocol.chat import send as c_send
 from myProtocol.udp_broadcaster import receive as bp_receive
 from myProtocol.udp_broadcaster import send_broadcast_request as bp_send_broadcast_request
 from myProtocol.udp_broadcaster import send_listening_message as bp_send_listening_message
 from myProtocol.udp_listener import receive_broadcast_request as lp_receive_broadcast_request
 from myProtocol.udp_listener import send as lp_send
-from myProtocol.chat import receive as c_receive
-from myProtocol.chat import send as c_send
 
 # Constants
 BROADCAST_PORT = 37020
