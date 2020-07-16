@@ -5,15 +5,11 @@ from threading import Thread
 
 from colorama import Fore
 
-from myProtocol.chat import receive as c_receive
-from myProtocol.chat import send as c_send
-from myProtocol.udp_broadcaster import receive as bp_receive
-from myProtocol.udp_broadcaster import send_broadcast_request as bp_send_broadcast_request
-from myProtocol.udp_broadcaster import send_listening_message as bp_send_listening_message
-from myProtocol.udp_listener import receive_broadcast_request as lp_receive_broadcast_request
-from myProtocol.udp_listener import send as lp_send
+import myProtocol.chat as chat_protocol
+import myProtocol.udp as udp_protocol
 
 # Constants
+
 BROADCAST_PORT = 37020
 BROADCAST_INTERVAL = 20
 AF_INET = socket.AF_INET
@@ -67,16 +63,16 @@ class Chat:
                     is_bind = False
 
             while not self.is_connected:
-                server.sendto(bp_send_broadcast_request(self.my_chat_port), ('<broadcast>', BROADCAST_PORT))
+                server.sendto(udp_protocol.send_broadcast_request(self.my_chat_port), ('<broadcast>', BROADCAST_PORT))
                 print(CL_REGULAR + "****Broadcast****")
                 try:
                     data, addr = server.recvfrom(1024)
-                    received_port = bp_receive(data)
+                    received_port = udp_protocol.receive_broadcast_response(data)
                     if self.my_chat_port != received_port:
                         print(CL_REGULAR + "UDP_B {addr}: \"port={port}\"".format(addr=addr, port=received_port))
                         self.set_other(addr[0], received_port)
                         self.listen()
-                        server.sendto(bp_send_listening_message(self.my_chat_port), addr)
+                        server.sendto(udp_protocol.send_listening_message(self.my_chat_port), addr)
                         break
                 except (ValueError, Exception):
                     print(CL_REGULAR + "Broadcast has no answer", )
@@ -93,9 +89,9 @@ class Chat:
             print(CL_REGULAR + "I'm listening on ", BROADCAST_PORT)
             while not self.is_connected:
                 data, addr = client.recvfrom(1024)
-                received_port = lp_receive_broadcast_request(data)
+                received_port = udp_protocol.receive_broadcast_request(data)
                 if self.broadcast_port != addr[1]:
-                    client.sendto(lp_send(self.my_chat_port), addr)
+                    client.sendto(udp_protocol.send_broadcast_response(self.my_chat_port), addr)
                     self.set_other(addr[0], received_port)
                     print(CL_REGULAR + "UDP_L: {}: \"port={}\"".format(addr, received_port))
                     client.recvfrom(1024)
@@ -146,7 +142,7 @@ class Chat:
         while True:
             try:
                 request = client.recv(1024)
-                sender, message = c_receive(request)
+                sender, message = chat_protocol.receive(request)
                 print(CL_OTHER_MESSAGE + "{}>>>>{}".format(sender, message))
             except (ValueError, Exception):
                 if not client._closed:
@@ -159,7 +155,7 @@ class Chat:
             message = input()
             if message != "EXIT":
                 try:
-                    client.send(c_send(self.name, message))
+                    client.send(chat_protocol.send(self.name, message))
                     print(CL_MY_MESSAGE + "ME>>>>{}".format(message))
                 except (ValueError, Exception):
                     self.close_tcp_connection(client)
